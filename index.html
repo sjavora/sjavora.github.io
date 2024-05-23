@@ -65,10 +65,9 @@
                 try {
                     if (window[handlerName]) {
 
-                        window.onmessage = function(event) {
-                            window.onmessage = undefined;
-
+                        window[handlerName].onmessage = function(event) {
                             console.log('Received message event:', event);
+                            window.onmessage = undefined;
                             resolve(event.data);
                         }
 
