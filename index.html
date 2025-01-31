@@ -3,107 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>PostMessage Test</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        label {
-            margin: 10px 0 5px;
-            width: 100%;
-            max-width: 400px;
-        }
-        input, button {
-            margin: 5px 0 10px;
-            width: 100%;
-            max-width: 400px;
-            padding: 10px;
-            box-sizing: border-box;
-            height: 44px;
-        }
-        #responseOutput {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            display: none;
-            word-break: break-word;
-        }
-    </style>
+    <title>Test</title>
 </head>
 <body>
-    <h1>PostMessage Test</h1>
-    <label for="handlerInput">Handler Name:</label>
-    <input type="text" id="handlerInput" placeholder="Enter handler name" value="testHandler" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-
-    <label for="messageInput">Message:</label>
-    <input type="text" id="messageInput" placeholder="Enter your message" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-
-    <button id="sendMessageBtn">Send Message</button>
-    <div id="responseOutput"></div>
-
-    <script>
-        const handlerInput = document.getElementById('handlerInput');
-        const messageInput = document.getElementById('messageInput');
-        const sendMessageBtn = document.getElementById('sendMessageBtn');
-        const responseOutput = document.getElementById('responseOutput');
-
-        // Function to send a message and return a promise
-        async function sendMessage(handlerName, message) {
-            return new Promise((resolve, reject) => {
-                console.log('Sending message through handler:', handlerName);
-                try {
-                    if (window[handlerName]) {
-
-                        window[handlerName].onmessage = function(event) {
-                            console.log('Received message event:', event);
-                            window.onmessage = undefined;
-                            resolve(event.data);
-                        }
-
-                        window[handlerName].postMessage(message);
-
-                    } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers[handlerName]) {
-                        resolve(window.webkit.messageHandlers[handlerName].postMessage(message));
-                    } else {
-                        console.log('Handler not found:', handlerName);
-                        reject('Handler not found');
-                    }
-                } catch (error) {
-                    console.error('Error sending message:', error);
-                    reject(error);
-                }
-            });
-        }
-
-        async function handleSendMessage() {
-            const handlerName = handlerInput.value;
-            const message = messageInput.value;
-            console.log('Handling send message:', { handlerName, message });
-
-            try {
-                const response = await sendMessage(handlerName, message);
-                console.log('Received response:', response);
-                responseOutput.textContent = 'Received response: ' + response;
-                responseOutput.style.display = 'block';
-            } catch (error) {
-                console.log('Error occurred:', error);
-                responseOutput.textContent = 'Error: ' + error;
-                responseOutput.style.display = 'block';
-            }
-        }
-
-        sendMessageBtn.addEventListener('click', handleSendMessage);
-    </script>
+    <h1>Link Test</h1>
+    <a href="https://example.com" target="_blank">Open directly</a>
+    <br>
+    <a href="https://example.com" target="_blank">Open in New Tab</a>
 </body>
 </html>
