@@ -14,29 +14,21 @@
             text-align: center;
         }
         .content {
-            width: 50vw;
+            background: teal;
+            width: 100vw;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .left {
-            background: yellow;
-        }
-        .right {
-            background: green;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
     </style>
 </head>
 <body>
-    <div class="content left">
+    <div class="content">
         <h1>Safe Area Test (env)</h1>
         <p>This box uses env() values.</p>
-    </div>
-    <div class="content right">
-        <h1>Safe Area Test (var)</h1>
-        <p>This box uses var() values.</p>
     </div>
 </body>
 </html>
