@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Safe Area Insets Test</title>
     <style>
+        :root {
+            --safe-area-inset-top: env(safe-area-inset-top);
+            --safe-area-inset-right: env(safe-area-inset-right);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom);
+            --safe-area-inset-left: env(safe-area-inset-left);
+        }
         body {
             margin: 0;
             background-color: #f0f0f0;
@@ -15,8 +21,6 @@
         }
         .content {
             background: orange;
-            width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right));
-            height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
             margin: var(--safe-area-inset-top) var(--safe-area-inset-right) var(--safe-area-inset-bottom) var(--safe-area-inset-left);
             display: block;
             justify-content: center;
