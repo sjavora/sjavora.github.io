@@ -21,9 +21,11 @@
             text-align: center;
         }
         .content {
-            background: teal;
-            margin: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            background: orange;
+            margin: var(--safe-area-inset-top) var(--safe-area-inset-right) var(--safe-area-inset-bottom) var(--safe-area-inset-left);
             display: block;
+            width: 100vw;
+            height: 100vh;
             justify-content: center;
             align-items: center;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -32,8 +34,7 @@
 </head>
 <body>
     <div class="content">
-        <h1>Safe Area Test (env)</h1>
-        <a href="var.html">switch to var</a>
+        <h1>Safe Area Test</h1>
     </div>
 </body>
 </html>
