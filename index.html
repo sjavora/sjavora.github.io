@@ -2,39 +2,256 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Safe Area Insets Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History API Test - WKWebView Location Change Detection</title>
     <style>
-        :root {
-            --safe-area-inset-top: env(safe-area-inset-top);
-            --safe-area-inset-right: env(safe-area-inset-right);
-            --safe-area-inset-bottom: env(safe-area-inset-bottom);
-            --safe-area-inset-left: env(safe-area-inset-left);
-        }
         body {
-            margin: 0;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
-        .content {
-            background: orange;
-            margin: var(--safe-area-inset-top) var(--safe-area-inset-right) var(--safe-area-inset-bottom) var(--safe-area-inset-left);
-            display: block;
-            width: 100vw;
-            height: 100vh;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .url-display {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        
+        .button-group {
+            margin: 20px 0;
+        }
+        
+        .button-group h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .push-btn { background: #28a745; }
+        .push-btn:hover { background: #1e7e34; }
+        
+        .replace-btn { background: #ffc107; color: #000; }
+        .replace-btn:hover { background: #e0a800; }
+        
+        .back-btn { background: #6c757d; }
+        .back-btn:hover { background: #545b62; }
+        
+        .log {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            padding: 2px 0;
+        }
+        
+        .timestamp {
+            color: #a0aec0;
+        }
+        
+        .explanation {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
         }
     </style>
 </head>
 <body>
-    <div class="content">
-        <h1>Safe Area Test</h1>
+    <div class="container">
+        <h1>🧪 History API Test Page</h1>
+        
+        <div class="explanation">
+            <strong>Purpose:</strong> This page tests WKWebView's ability to detect URL changes made via JavaScript History API 
+            (pushState, replaceState, popstate). Traditional navigation delegates don't catch these changes.
+        </div>
+        
+        <div class="url-display">
+            <strong>Current URL:</strong> <span id="current-url"></span>
+        </div>
+        
+        <div class="button-group">
+            <h3>🔀 History API Navigation</h3>
+            <button class="push-btn" onclick="pushNewState()">Push State (Page 1)</button>
+            <button class="push-btn" onclick="pushNewState2()">Push State (Page 2)</button>
+            <button class="push-btn" onclick="pushNewState3()">Push State (Page 3)</button>
+        </div>
+        
+        <div class="button-group">
+            <h3>✏️ Replace Current State</h3>
+            <button class="replace-btn" onclick="replaceState()">Replace State (Modified)</button>
+            <button class="replace-btn" onclick="replaceWithQuery()">Replace with Query Params</button>
+        </div>
+        
+        <div class="button-group">
+            <h3>⬅️ Browser Navigation</h3>
+            <button class="back-btn" onclick="goBack()">History Back</button>
+            <button class="back-btn" onclick="goForward()">History Forward</button>
+        </div>
+        
+        <div class="button-group">
+            <h3>🔄 Regular Navigation (for comparison)</h3>
+            <button onclick="regularNavigation()">Regular Page Reload</button>
+            <button onclick="hashNavigation()">Hash Navigation</button>
+        </div>
+        
+        <h3>📝 Event Log</h3>
+        <div id="log" class="log">
+            <div class="log-entry">
+                <span class="timestamp">[Ready]</span> Page loaded. Waiting for navigation events...
+            </div>
+        </div>
     </div>
+
+    <script>
+        let stateCounter = 0;
+        
+        function updateCurrentURL() {
+            document.getElementById('current-url').textContent = window.location.href;
+        }
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            console.log(`[${type}] ${message}`);
+        }
+        
+        function pushNewState() {
+            stateCounter++;
+            const newURL = `${window.location.pathname}?page=1&state=${stateCounter}`;
+            history.pushState({page: 1, counter: stateCounter}, `Page 1 - State ${stateCounter}`, newURL);
+            log(`🔀 pushState() called: ${newURL}`, 'push');
+            updateCurrentURL();
+        }
+        
+        function pushNewState2() {
+            stateCounter++;
+            const newURL = `${window.location.pathname}?page=2&state=${stateCounter}`;
+            history.pushState({page: 2, counter: stateCounter}, `Page 2 - State ${stateCounter}`, newURL);
+            log(`🔀 pushState() called: ${newURL}`, 'push');
+            updateCurrentURL();
+        }
+        
+        function pushNewState3() {
+            stateCounter++;
+            const newURL = `${window.location.pathname}?page=3&state=${stateCounter}&features=test`;
+            history.pushState({page: 3, counter: stateCounter}, `Page 3 - State ${stateCounter}`, newURL);
+            log(`🔀 pushState() called: ${newURL}`, 'push');
+            updateCurrentURL();
+        }
+        
+        function replaceState() {
+            stateCounter++;
+            const newURL = `${window.location.pathname}?modified=true&timestamp=${Date.now()}`;
+            history.replaceState({modified: true, counter: stateCounter}, `Modified - State ${stateCounter}`, newURL);
+            log(`✏️ replaceState() called: ${newURL}`, 'replace');
+            updateCurrentURL();
+        }
+        
+        function replaceWithQuery() {
+            const params = new URLSearchParams(window.location.search);
+            params.set('replaced', 'true');
+            params.set('time', new Date().toISOString());
+            const newURL = `${window.location.pathname}?${params.toString()}`;
+            history.replaceState({replaced: true}, 'Replaced with Query', newURL);
+            log(`✏️ replaceState() with query params: ${newURL}`, 'replace');
+            updateCurrentURL();
+        }
+        
+        function goBack() {
+            log('⬅️ history.back() called', 'navigation');
+            history.back();
+        }
+        
+        function goForward() {
+            log('➡️ history.forward() called', 'navigation');
+            history.forward();
+        }
+        
+        function regularNavigation() {
+            log('🔄 Regular navigation (reload) - this should trigger standard navigation delegate', 'normal');
+            window.location.reload();
+        }
+        
+        function hashNavigation() {
+            const newHash = '#section-' + Math.floor(Math.random() * 1000);
+            log(`🔗 Hash navigation: ${newHash}`, 'hash');
+            window.location.hash = newHash;
+            updateCurrentURL();
+        }
+        
+        // Listen for popstate events (back/forward navigation)
+        window.addEventListener('popstate', function(event) {
+            log(`📍 popstate event fired. State: ${JSON.stringify(event.state)}`, 'popstate');
+            updateCurrentURL();
+        });
+        
+        // Listen for our custom locationchange events (these are dispatched by our injected script)
+        window.addEventListener('locationchange', function() {
+            log('🎯 Custom locationchange event detected!', 'locationchange');
+        });
+        
+        // Update URL on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentURL();
+            log('✅ Page loaded and ready for testing', 'ready');
+        });
+        
+        // Update URL display when hash changes
+        window.addEventListener('hashchange', function() {
+            updateCurrentURL();
+            log(`🔗 hashchange event: ${window.location.hash}`, 'hash');
+        });
+    </script>
 </body>
 </html>
